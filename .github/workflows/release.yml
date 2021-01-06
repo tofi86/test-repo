@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '^v[0-9]+\.[0-9]+\.[0-9]+'
+
+jobs:
+
+  draft_release:
+    name: Create draft release
+    runs-on: ubuntu-latest
+    # Note this. We are going to use that in further jobs.
+    outputs:
+      upload_url: ${{ steps.create_draft_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_draft_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+  build:
+    name: Build with shc on ${{ matrix.os }}
+    needs: create_draft_release # we need to know the upload URL
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # os: [ macos-10.15, macos-11.0 ]
+        os: [ macos-10.15 ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install shc via HomeBrew
+      run: |
+        brew install shc
+        shc -h
+
+    - name: Compile universalJavaApplicationStub
+      run: |
+        echo "Running shc..."
+        shc -r -f src/universalJavaApplicationStub
+
+    - name: ZIP universalJavaApplicationStub binary
+      run: |
+        echo "Zipping binary..."
+        mv src/universalJavaApplicationStub.x universalJavaApplicationStub
+        rm src/universalJavaApplicationStub.x.c
+        zip --junk-paths universalJavaApplicationStub-${{ matrix.os }}.zip universalJavaApplicationStub
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_draft_release.outputs.upload_url }}
+        asset_name: universalJavaApplicationStub-${GITHUB_REF##*/}-${{ matrix.os }}
+        asset_path: ./universalJavaApplicationStub-${{ matrix.os }}.zip
+        asset_content_type: application/zip
+
+  publish_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub draft release
+        uses: Roang-zero1/github-create-release-action@master
+        with:
+          version_regex: ^v[0-9]+\.[0-9]+\.[0-9]+
+          update_existing: true
+          create_draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
