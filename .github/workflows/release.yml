@@ -37,6 +37,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
+
     - name: Install shc via HomeBrew
       run: |
         brew install shc
@@ -60,7 +63,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.draft_release.outputs.upload_url }}
-        asset_name: universalJavaApplicationStub-${{ github.ref }}-${{ matrix.os }}.zip
+        asset_name: universalJavaApplicationStub-${{ env.RELEASE_VERSION }}-${{ matrix.os }}.zip
         asset_path: ./universalJavaApplicationStub-${{ matrix.os }}.zip
         asset_content_type: application/zip
 
@@ -70,13 +73,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-  
-      - name: Publish GitHub draft release
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
+
+      - name: Publish draft release
         uses: Roang-zero1/github-create-release-action@master
         with:
-          version_regex: ^v[0-9]+\.[0-9]+\.[0-9]+
-          update_existing: true
-          create_draft: false
-          changelog_file: CHANGELOG.md
+          created_tag: ${{ env.RELEASE_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
