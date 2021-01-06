@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          release_name: ${{ github.ref }}
           draft: true
           prerelease: false
 
@@ -60,7 +60,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.draft_release.outputs.upload_url }}
-        asset_name: universalJavaApplicationStub-${GITHUB_REF##*/}-${{ matrix.os }}
+        asset_name: universalJavaApplicationStub-${{ github.ref }}-${{ matrix.os }}.zip
         asset_path: ./universalJavaApplicationStub-${{ matrix.os }}.zip
         asset_content_type: application/zip
 
