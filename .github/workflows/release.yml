@@ -12,8 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     # Note this. We are going to use that in further jobs.
     outputs:
+      release_id: ${{ steps.create_draft_release.outputs.id }}
       upload_url: ${{ steps.create_draft_release.outputs.upload_url }}
     steps:
+      - name: Extract release notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v1
       - name: Create release
         id: create_draft_release
         uses: actions/create-release@v1
@@ -24,6 +28,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: true
           prerelease: false
+          body: ${{ steps.extract-release-notes.outputs.release_notes }}
 
   build:
     name: Build with shc on ${{ matrix.os }}
@@ -72,15 +77,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
-
-      - name: Publish draft release
-        uses: Roang-zero1/github-create-release-action@master
-        with:
-          created_tag: ${{ env.RELEASE_VERSION }}
-          update_existing: true
+      - uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ needs.draft_release.outputs.release_id }}
