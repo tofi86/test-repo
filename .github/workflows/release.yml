@@ -65,13 +65,18 @@ jobs:
         asset_content_type: application/zip
 
   publish_release:
+    name: Publish GitHub draft release
+    needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+  
       - name: Publish GitHub draft release
         uses: Roang-zero1/github-create-release-action@master
         with:
           version_regex: ^v[0-9]+\.[0-9]+\.[0-9]+
           update_existing: true
           create_draft: false
+          changelog_file: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
