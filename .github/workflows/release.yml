@@ -35,7 +35,7 @@ jobs:
         id: create_draft_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_API_PERSONAL_ACCESS_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
@@ -51,7 +51,7 @@ jobs:
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_API_PERSONAL_ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_draft_release.outputs.upload_url }}
           asset_name: universalJavaApplicationStub-v${{ env.RELEASE_VERSION }}-source.zip
@@ -93,7 +93,7 @@ jobs:
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_API_PERSONAL_ACCESS_TOKEN }}
         with:
           upload_url: ${{ needs.draft_release.outputs.upload_url }}
           asset_name: universalJavaApplicationStub-${{ env.RELEASE_TAG }}-binary-${{ matrix.os }}.zip
@@ -109,6 +109,6 @@ jobs:
     steps:
       - uses: eregon/publish-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_API_PERSONAL_ACCESS_TOKEN }}
         with:
           release_id: ${{ needs.draft_release.outputs.release_id }}
