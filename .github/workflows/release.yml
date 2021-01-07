@@ -54,7 +54,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_draft_release.outputs.upload_url }}
-          asset_name: universalJavaApplicationStub-${{ env.RELEASE_TAG }}-source.zip
+          asset_name: universalJavaApplicationStub-v${{ env.RELEASE_VERSION }}-source.zip
           asset_path: ./universalJavaApplicationStub-uncompiled.zip
           asset_content_type: application/zip
 
